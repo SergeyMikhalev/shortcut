@@ -55,6 +55,11 @@
 			<artifactId>postgresql</artifactId>
 			<version>42.5.4</version>
 		</dependency>
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+			<version>3.6.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -97,15 +102,6 @@
 				<configuration>
 					<propertyFile>db/liquibase.properties</propertyFile>
 				</configuration>
-				<executions>
-					<execution>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>clearCheckSums</goal>
-							<goal>update</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
