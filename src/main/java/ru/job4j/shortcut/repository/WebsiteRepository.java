@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.job4j.shortcut.model.Website;
 
 @Repository
-public interface WebsiteRepository extends CrudRepository<Website,Integer> {
+public interface WebsiteRepository extends CrudRepository<Website, Integer> {
     boolean existsByUrlIgnoreCase(@NonNull String url);
 
     boolean existsByLoginIgnoreCase(@NonNull String login);

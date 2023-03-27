@@ -8,7 +8,6 @@ import ru.job4j.shortcut.dto.RegistrationResponse;
 import ru.job4j.shortcut.model.Website;
 import ru.job4j.shortcut.repository.WebsiteRepository;
 
-import java.sql.SQLException;
 
 @Service
 public class RegistrationServiceImpl implements RegistrationService {
