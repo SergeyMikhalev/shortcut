@@ -9,11 +9,14 @@ services:
       - POSTGRES_DB=shortcut
       - PGDATA=/var/lib/postgresql/data
     volumes:
-      - ./db/shortcut/data:/var/lib/postgresql/data
+      - /home/sergey/projects/data:/var/lib/postgresql/data
     ports:
       - 5432:5432
     restart: always
   app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: shortcut
     container_name: shortcut
     environment:
