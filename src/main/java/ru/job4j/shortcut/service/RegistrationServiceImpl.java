@@ -1,5 +1,6 @@
 package ru.job4j.shortcut.service;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +18,12 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final WebsiteRepository repository;
     private final RandomStringService randomStringService;
 
-    public RegistrationServiceImpl(WebsiteRepository repository, RandomStringServiceImpl randomStringService) {
+    private final BCryptPasswordEncoder encoder;
+
+    public RegistrationServiceImpl(WebsiteRepository repository, RandomStringService randomStringService, BCryptPasswordEncoder encoder) {
         this.repository = repository;
         this.randomStringService = randomStringService;
+        this.encoder = encoder;
     }
 
     @Override
@@ -37,9 +41,9 @@ public class RegistrationServiceImpl implements RegistrationService {
         } while (repository.existsByLoginIgnoreCase(login));
         do {
             password = randomStringService.generateString(PASSWORD_SIZE);
-        } while (repository.existsByPasswordIgnoreCase(password));
+        } while (repository.existsByPasswordIgnoreCase(encoder.encode(password)));
 
-        Website site = new Website(request.getSite(), login, password);
+        Website site = new Website(request.getSite(), login, encoder.encode(password));
 
         try {
             site = repository.save(site);

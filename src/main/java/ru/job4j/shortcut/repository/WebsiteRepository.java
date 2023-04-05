@@ -5,6 +5,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import ru.job4j.shortcut.model.Website;
 
+import java.util.Optional;
+
 @Repository
 public interface WebsiteRepository extends CrudRepository<Website, Integer> {
     boolean existsByUrlIgnoreCase(@NonNull String url);
@@ -12,5 +14,7 @@ public interface WebsiteRepository extends CrudRepository<Website, Integer> {
     boolean existsByLoginIgnoreCase(@NonNull String login);
 
     boolean existsByPasswordIgnoreCase(@NonNull String password);
+
+    Optional<Website> findByLogin(@NonNull String login);
 
 }
