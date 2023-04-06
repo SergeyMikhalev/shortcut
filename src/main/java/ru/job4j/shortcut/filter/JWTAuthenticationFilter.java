@@ -25,9 +25,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public static final long EXPIRATION_TIME = 864_000_000; /* 10 days */
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String HEADER_STRING = "Authorization";
-    public static final String SIGN_UP_URL = "/sign-up";
 
     public static final String REGISTER_URL = "/registration";
+
+    public static final String REDIRECT_URL = "/redirect/**";
 
     private final AuthenticationManager auth;
 
@@ -38,6 +39,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
             throws AuthenticationException {
+        System.out.println("-- AuthenticationFilter attempt --");
         try {
             Website creds = new ObjectMapper()
                     .readValue(req.getInputStream(), Website.class);
@@ -58,7 +60,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             HttpServletResponse res,
                                             FilterChain chain,
                                             Authentication auth) {
-
+        System.out.println("-- AuthenticationFilter success --");
+        System.out.println(((User) auth.getPrincipal()).getUsername());
         String token = JWT.create()
                 .withSubject(((User) auth.getPrincipal()).getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
