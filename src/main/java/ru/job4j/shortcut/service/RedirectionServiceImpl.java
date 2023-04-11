@@ -18,6 +18,7 @@ public class RedirectionServiceImpl implements RedirectionService {
         if (ref.isEmpty()) {
             throw new IllegalArgumentException(" Для кода: " + code + " ссылки переадресации не найдено");
         }
+        refs.incrementUseCount(ref.get().getId());
         return ref.get().getUrl();
     }
 

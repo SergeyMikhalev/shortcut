@@ -20,9 +20,13 @@ public class WebRef {
     @Column(name = "site_id")
     private int siteId;
 
+    @Column(name = "use_count")
+    private int useCount;
+
     public WebRef(String url, String code, int siteId) {
         this.url = url;
         this.code = code;
         this.siteId = siteId;
+        this.useCount = 0;
     }
 }
