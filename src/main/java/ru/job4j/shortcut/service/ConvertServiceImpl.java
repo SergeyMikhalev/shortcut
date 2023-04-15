@@ -10,6 +10,9 @@ import ru.job4j.shortcut.model.Website;
 import ru.job4j.shortcut.repository.WebRefRepository;
 import ru.job4j.shortcut.repository.WebsiteRepository;
 
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
@@ -26,6 +29,7 @@ public class ConvertServiceImpl implements ConvertService {
 
 
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ConvertResponse convert(ConvertRequest request) {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         Website site = getExistingWebsite(userName);

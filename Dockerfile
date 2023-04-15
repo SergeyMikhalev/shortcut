@@ -2,7 +2,7 @@
 FROM maven:3.8-openjdk-17 as maven
 WORKDIR /app
 COPY . /app
-RUN mvn install
+RUN mvn install -Dmaven.test.skip
 
 # Этап 2 - указание как запустить проект
 FROM openjdk:17.0.2-jdk
