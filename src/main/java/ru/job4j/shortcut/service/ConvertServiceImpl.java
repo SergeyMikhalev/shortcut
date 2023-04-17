@@ -45,7 +45,11 @@ public class ConvertServiceImpl implements ConvertService {
     }
 
     private void tryToSaveWebRef(ConvertRequest request, Website site, String code) {
-        WebRef webRef = new WebRef(request.getUrl(), code, site.getId());
+        WebRef webRef = WebRef.of()
+                .url(request.getUrl())
+                .code(code)
+                .siteId(site.getId())
+                .build();
         try {
             refs.save(webRef);
         } catch (Exception e) {

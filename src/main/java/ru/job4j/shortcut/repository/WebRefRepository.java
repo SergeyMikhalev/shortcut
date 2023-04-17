@@ -18,7 +18,6 @@ public interface WebRefRepository extends CrudRepository<WebRef, Integer> {
 
     Optional<WebRef> findByCode(String code);
 
-    @Transactional
     @Modifying
     @Query(value = "update refs set use_count = use_count+1 where id =?1", nativeQuery = true)
     int incrementUseCount(Integer id);

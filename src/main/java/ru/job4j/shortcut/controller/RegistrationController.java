@@ -20,6 +20,12 @@ public class RegistrationController {
         return new ResponseEntity<>(registrationService.register(request), HttpStatus.CREATED);
     }
 
+    @PostMapping("/wrong")
+    public ResponseEntity<String> registerWrong(@RequestBody RegistrationRequest request) {
+        registrationService.some(request.getSite());
+        return new ResponseEntity<>("OK", HttpStatus.CREATED);
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<String> onRepositoryException(RuntimeException e) {
         return new ResponseEntity<>(e.getMessage(),

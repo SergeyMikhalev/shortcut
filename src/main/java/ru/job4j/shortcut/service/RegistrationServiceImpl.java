@@ -1,5 +1,6 @@
 package ru.job4j.shortcut.service;
 
+import org.postgresql.util.PSQLException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -15,6 +16,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private final static int LOGIN_SIZE = 5;
     private final static int PASSWORD_SIZE = 5;
+
+    private final static int MAX_ATTEMPTS_TO_GENERATE = 10;
     private final WebsiteRepository repository;
     private final RandomStringService randomStringService;
 
@@ -43,13 +46,57 @@ public class RegistrationServiceImpl implements RegistrationService {
             password = randomStringService.generateString(PASSWORD_SIZE);
         } while (repository.existsByPasswordIgnoreCase(encoder.encode(password)));
 
-        Website site = new Website(request.getSite(), login, encoder.encode(password));
-
+        Website site = Website.of()
+                .url(request.getSite())
+                .login(login)
+                .password(encoder.encode(password))
+                .build();
         try {
             site = repository.save(site);
         } catch (Exception e) {
             throw new IllegalStateException("Не удалось сохранить в БД объект: " + site + " -> " + e.getMessage());
         }
         return new RegistrationResponse(true, login, password);
+    }
+
+    private Website fastRegister(String url) {
+        String login;
+        String password;
+        Website site = new Website();
+        boolean saved = false;
+        while ((!saved)) {
+            login = randomStringService.generateString(LOGIN_SIZE);
+            password = randomStringService.generateString(PASSWORD_SIZE);
+            site = Website.of()
+                    .url(url)
+                    .login(login)
+                    .password(encoder.encode(password))
+                    .build();
+            site = repository.save(site);
+            saved = true;
+            try {
+
+            } catch (Exception e) {
+                String message = e.getMessage();
+                boolean uniqueIssuesReason = (message.contains("ограничение уникальности")
+                        && ((message.contains("login_key")) | (message.contains("password_key"))
+                ));
+                if (!uniqueIssuesReason) {
+                    throw new IllegalStateException("Не удалось сохранить в БД объект: " + site + " -> " + e.getMessage());
+                }
+                System.out.println(message);
+            }
+        }
+        return site;
+    }
+
+    @Override
+    public void some(String url) {
+        Website site = Website.of()
+                .url(url)
+                .login("login")
+                .password(encoder.encode("password"))
+                .build();
+        repository.save(site);
     }
 }

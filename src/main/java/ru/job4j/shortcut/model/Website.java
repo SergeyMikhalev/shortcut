@@ -1,28 +1,23 @@
 package ru.job4j.shortcut.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder(builderMethodName = "of")
 @Entity
 @Table(name = "websites")
 public class Website {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private int id;
-
     private String url;
     private String login;
     private String password;
 
-    public Website(String url, String login, String password) {
-        this.url = url;
-        this.login = login;
-        this.password = password;
-    }
 }
