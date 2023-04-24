@@ -1,6 +1,5 @@
 package ru.job4j.shortcut.service;
 
-import org.postgresql.util.PSQLException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -30,73 +29,74 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public RegistrationResponse register(RegistrationRequest request) {
-        String login;
         String password;
-
+        int attemts;
+        Website site;
         if (repository.existsByUrlIgnoreCase(request.getSite())) {
             return new RegistrationResponse(false, "-", "-");
         }
-
+        boolean saved = false;
         do {
-            login = randomStringService.generateString(LOGIN_SIZE);
-        } while (repository.existsByLoginIgnoreCase(login));
-        do {
-            password = randomStringService.generateString(PASSWORD_SIZE);
-        } while (repository.existsByPasswordIgnoreCase(encoder.encode(password)));
-
-        Website site = Website.of()
-                .url(request.getSite())
-                .login(login)
-                .password(encoder.encode(password))
-                .build();
-        try {
-            site = repository.save(site);
-        } catch (Exception e) {
-            throw new IllegalStateException("Не удалось сохранить в БД объект: " + site + " -> " + e.getMessage());
-        }
-        return new RegistrationResponse(true, login, password);
+            site = getWebsite(request.getSite());
+            password = site.getPassword();
+            try {
+                site.setPassword(encoder.encode(site.getPassword()));
+                site = repository.save(site);
+                saved = true;
+            } catch (Exception e) {
+                handleSaveExceptions(site, e);
+            }
+        } while (!saved);
+        return new RegistrationResponse(true, site.getLogin(), password);
     }
 
-    private Website fastRegister(String url) {
-        String login;
-        String password;
-        Website site = new Website();
-        boolean saved = false;
-        while ((!saved)) {
-            login = randomStringService.generateString(LOGIN_SIZE);
-            password = randomStringService.generateString(PASSWORD_SIZE);
-            site = Website.of()
-                    .url(url)
-                    .login(login)
-                    .password(encoder.encode(password))
-                    .build();
-            site = repository.save(site);
-            saved = true;
-            try {
 
+    private Website fastRegister(String url) {
+        Website site;
+
+        boolean saved = false;
+        do {
+            site = getWebsite(url);
+            try {
+                site.setPassword(encoder.encode(site.getPassword()));
+                site = repository.save(site);
+                saved = true;
             } catch (Exception e) {
-                String message = e.getMessage();
-                boolean uniqueIssuesReason = (message.contains("ограничение уникальности")
-                        && ((message.contains("login_key")) | (message.contains("password_key"))
-                ));
-                if (!uniqueIssuesReason) {
-                    throw new IllegalStateException("Не удалось сохранить в БД объект: " + site + " -> " + e.getMessage());
-                }
-                System.out.println(message);
+                handleSaveExceptions(site, e);
             }
+        } while (!saved);
+        return site;
+    }
+
+    private void handleSaveExceptions(Website site, Exception e) {
+        String message = e.getMessage();
+        boolean uniqueIssuesReason = message.contains("ConstraintViolationException");
+        if (!uniqueIssuesReason) {
+            throw new IllegalStateException("Не удалось сохранить в БД объект: " + site + " -> " + e.getMessage());
         }
+    }
+
+    private Website getWebsite(String url) {
+        String login = randomStringService.generateString(LOGIN_SIZE);
+        String password = randomStringService.generateString(PASSWORD_SIZE);
+        Website site = Website.of()
+                .url(url)
+                .login(login)
+                .password(password)
+                .build();
         return site;
     }
 
     @Override
     public void some(String url) {
-        Website site = Website.of()
+        fastRegister(url);
+       /* Website site = Website.of()
                 .url(url)
                 .login("login")
                 .password(encoder.encode("password"))
                 .build();
-        repository.save(site);
+        repository.save(site); */
     }
 }

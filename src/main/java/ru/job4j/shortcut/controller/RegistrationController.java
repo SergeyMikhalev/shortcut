@@ -21,9 +21,9 @@ public class RegistrationController {
     }
 
     @PostMapping("/wrong")
-    public ResponseEntity<String> registerWrong(@RequestBody RegistrationRequest request) {
+    public ResponseEntity<RegistrationResponse> registerWrong(@RequestBody RegistrationRequest request) {
         registrationService.some(request.getSite());
-        return new ResponseEntity<>("OK", HttpStatus.CREATED);
+        return new ResponseEntity<>(null, HttpStatus.CREATED);
     }
 
     @ExceptionHandler(IllegalStateException.class)
