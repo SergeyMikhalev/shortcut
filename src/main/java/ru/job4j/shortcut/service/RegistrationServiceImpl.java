@@ -1,5 +1,6 @@
 package ru.job4j.shortcut.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -9,8 +10,11 @@ import ru.job4j.shortcut.dto.RegistrationResponse;
 import ru.job4j.shortcut.model.Website;
 import ru.job4j.shortcut.repository.WebsiteRepository;
 
+import java.util.Optional;
+
 
 @Service
+@AllArgsConstructor
 public class RegistrationServiceImpl implements RegistrationService {
 
     private final static int LOGIN_SIZE = 5;
@@ -22,52 +26,43 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private final BCryptPasswordEncoder encoder;
 
-    public RegistrationServiceImpl(WebsiteRepository repository, RandomStringService randomStringService, BCryptPasswordEncoder encoder) {
-        this.repository = repository;
-        this.randomStringService = randomStringService;
-        this.encoder = encoder;
-    }
 
     @Override
-    @Transactional
     public RegistrationResponse register(RegistrationRequest request) {
-        String password;
-        int attemts;
-        Website site;
-        if (repository.existsByUrlIgnoreCase(request.getSite())) {
-            return new RegistrationResponse(false, "-", "-");
-        }
-        boolean saved = false;
+        int attemts = 0;
+        Optional<RegistrationResponse> saveResult;
         do {
-            site = getWebsite(request.getSite());
-            password = site.getPassword();
-            try {
-                site.setPassword(encoder.encode(site.getPassword()));
-                site = repository.save(site);
-                saved = true;
-            } catch (Exception e) {
-                handleSaveExceptions(site, e);
+            if (repository.existsByUrlIgnoreCase(request.getSite())) {
+                return new RegistrationResponse(false, "-", "-");
             }
-        } while (!saved);
-        return new RegistrationResponse(true, site.getLogin(), password);
+            checkAttemptsCount(request, attemts);
+            attemts++;
+            saveResult = tryToRegisterSite(request);
+        } while (saveResult.isEmpty());
+        return saveResult.get();
     }
 
+    private Optional<RegistrationResponse> tryToRegisterSite(RegistrationRequest request) {
+        RegistrationResponse result = null;
+        Website site = getWebsite(request.getSite());
+        String password = site.getPassword();
+        site.setPassword(encoder.encode(site.getPassword()));
+        try {
+            site = repository.save(site);
+            result = new RegistrationResponse(true, site.getLogin(), password);
+        } catch (Exception e) {
+            handleSaveExceptions(site, e);
+        }
+        return Optional.ofNullable(result);
+    }
 
-    private Website fastRegister(String url) {
-        Website site;
-
-        boolean saved = false;
-        do {
-            site = getWebsite(url);
-            try {
-                site.setPassword(encoder.encode(site.getPassword()));
-                site = repository.save(site);
-                saved = true;
-            } catch (Exception e) {
-                handleSaveExceptions(site, e);
-            }
-        } while (!saved);
-        return site;
+    private static void checkAttemptsCount(RegistrationRequest request, int attempts) {
+        if (attempts > MAX_ATTEMPTS_TO_GENERATE) {
+            throw new IllegalStateException("Не удалось сгенерировать уникальные логин "
+                    + "и пароль для сохранения сайта " + request.getSite()
+                    + "  в БД за заданное количество итераций: "
+                    + MAX_ATTEMPTS_TO_GENERATE);
+        }
     }
 
     private void handleSaveExceptions(Website site, Exception e) {
@@ -87,16 +82,5 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .password(password)
                 .build();
         return site;
-    }
-
-    @Override
-    public void some(String url) {
-        fastRegister(url);
-       /* Website site = Website.of()
-                .url(url)
-                .login("login")
-                .password(encoder.encode("password"))
-                .build();
-        repository.save(site); */
     }
 }

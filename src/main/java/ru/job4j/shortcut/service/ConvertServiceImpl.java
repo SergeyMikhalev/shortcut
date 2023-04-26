@@ -29,7 +29,6 @@ public class ConvertServiceImpl implements ConvertService {
 
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ConvertResponse convert(ConvertRequest request) {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         Website site = getExistingWebsite(userName);

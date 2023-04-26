@@ -6,5 +6,4 @@ import ru.job4j.shortcut.dto.RegistrationResponse;
 public interface RegistrationService {
     RegistrationResponse register(RegistrationRequest request);
 
-    void some(String site);
 }
