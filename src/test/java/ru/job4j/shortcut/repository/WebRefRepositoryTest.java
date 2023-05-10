@@ -68,7 +68,7 @@ public class WebRefRepositoryTest {
     public void whenAddAndFindAll() {
         List<WebRef> refs = webRefRepository.findAll();
         assertEquals(refs.size(), 2);
-        List<String> urls = refs.stream().map(ref -> ref.getUrl()).collect(Collectors.toList());
+        List<String> urls = refs.stream().map(WebRef::getUrl).collect(Collectors.toList());
         List<String> urlsExpected = List.of("ya.ru/some", "ya.ru/someOther");
         assertTrue(urlsExpected.containsAll(urls));
     }
