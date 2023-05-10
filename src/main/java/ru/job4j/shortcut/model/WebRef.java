@@ -18,8 +18,9 @@ public class WebRef {
     private int id;
     private String url;
     private String code;
-    @Column(name = "site_id")
-    private int siteId;
+    @ManyToOne
+    @JoinColumn(name = "site_id")
+    private Website website;
     @Column(name = "use_count")
     private int useCount;
 

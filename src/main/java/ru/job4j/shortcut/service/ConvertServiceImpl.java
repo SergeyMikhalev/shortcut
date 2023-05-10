@@ -10,9 +10,6 @@ import ru.job4j.shortcut.model.Website;
 import ru.job4j.shortcut.repository.WebRefRepository;
 import ru.job4j.shortcut.repository.WebsiteRepository;
 
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
@@ -22,6 +19,7 @@ import java.util.Optional;
 public class ConvertServiceImpl implements ConvertService {
 
     public static final int REF_CODE_LENGTH = 6;
+    private static final int MAX_ATTEMPTS_TO_GENERATE_CODE = 10;
     private final WebRefRepository refs;
     private final WebsiteRepository sites;
 
@@ -30,6 +28,8 @@ public class ConvertServiceImpl implements ConvertService {
 
     @Override
     public ConvertResponse convert(ConvertRequest request) {
+        int attempts = 0;
+        Optional<String> retCode;
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         Website site = getExistingWebsite(userName);
         checkURL(request, site);
@@ -38,30 +38,39 @@ public class ConvertServiceImpl implements ConvertService {
         if (ref.isPresent()) {
             return new ConvertResponse(ref.get().getCode());
         }
-        String code = getUniqueRefCode();
-        tryToSaveWebRef(request, site, code);
-        return new ConvertResponse(code);
+
+        do {
+            checkAttemptsCount(request.getUrl(), attempts);
+            retCode = tryToSaveWebRef(request, site);
+            attempts++;
+        } while (retCode.isEmpty());
+
+        return new ConvertResponse(retCode.get());
     }
 
-    private void tryToSaveWebRef(ConvertRequest request, Website site, String code) {
+    private Optional<String> tryToSaveWebRef(ConvertRequest request, Website site) {
+        String resultCode = null;
+        String code = randomStringService.generateString(REF_CODE_LENGTH);
         WebRef webRef = WebRef.of()
                 .url(request.getUrl())
                 .code(code)
-                .siteId(site.getId())
+                .website(site)
                 .build();
         try {
             refs.save(webRef);
+            resultCode = webRef.getCode();
         } catch (Exception e) {
-            throw new IllegalStateException("Не удалось сохранить в БД объект: " + webRef + " -> " + e.getMessage());
+            handleSaveExceptions(webRef, e);
         }
+        return Optional.ofNullable(resultCode);
     }
 
-    private String getUniqueRefCode() {
-        String code;
-        do {
-            code = randomStringService.generateString(REF_CODE_LENGTH);
-        } while (refs.existsByCode(code));
-        return code;
+    private void handleSaveExceptions(WebRef ref, Exception e) {
+        String message = e.getMessage();
+        boolean uniqueIssuesReason = message.contains("ConstraintViolationException");
+        if (!uniqueIssuesReason) {
+            throw new IllegalStateException("Не удалось сохранить в БД объект: " + ref + " -> " + e.getMessage());
+        }
     }
 
     private Website getExistingWebsite(String userName) {
@@ -85,6 +94,15 @@ public class ConvertServiceImpl implements ConvertService {
             }
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Переданная ссылка не является URL " + e);
+        }
+    }
+
+    private static void checkAttemptsCount(String url, int attempts) {
+        if (attempts > MAX_ATTEMPTS_TO_GENERATE_CODE) {
+            throw new IllegalStateException("Не удалось сгенерировать уникальный код "
+                    + "для сохранения ссылки " + url
+                    + "  в БД за заданное количество итераций: "
+                    + MAX_ATTEMPTS_TO_GENERATE_CODE);
         }
     }
 }
