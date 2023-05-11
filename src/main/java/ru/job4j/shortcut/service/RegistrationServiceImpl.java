@@ -19,8 +19,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     private final static int LOGIN_SIZE = 5;
     private final static int PASSWORD_SIZE = 5;
-
     private final static int MAX_ATTEMPTS_TO_GENERATE = 10;
+
     private final WebsiteRepository repository;
     private final RandomStringService randomStringService;
 
