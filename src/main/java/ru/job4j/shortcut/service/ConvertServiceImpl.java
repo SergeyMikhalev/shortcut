@@ -19,7 +19,7 @@ import java.util.Optional;
 public class ConvertServiceImpl implements ConvertService {
 
     public static final int REF_CODE_LENGTH = 6;
-    private static final int MAX_ATTEMPTS_TO_GENERATE_CODE = 10;
+    public static final int MAX_ATTEMPTS_TO_GENERATE_CODE = 10;
 
     private final WebRefRepository refs;
     private final WebsiteRepository sites;
