@@ -118,7 +118,7 @@ public class ConvertServiceImplTest {
     @Test
     @WithMockUser(username = DEFAULT_USERNAME)
     public void whenConvertingReferenceDiffersFromUsersSite() {
-        Mockito.when(websiteRepository.findByLogin("admin")) /**/
+        Mockito.when(websiteRepository.findByLogin("admin"))
                 .thenReturn(Optional.of(Website.of()
                         .url("google.com")
                         .login("login")
