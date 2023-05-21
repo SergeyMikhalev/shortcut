@@ -36,10 +36,12 @@ public class RedirectionServiceImplTest {
     @Autowired
     private RedirectionService redirectionService;
 
+    private final String code = "007";
+    private final String url = "yandex.ru";
+
     @Test
     public void whenUsualCase() {
-        String code = "007";
-        String url = "yandex.ru";
+
         Mockito.when(webRefRepository.findByCode(code))
                 .thenReturn(Optional.of(WebRef
                         .of()
@@ -53,8 +55,6 @@ public class RedirectionServiceImplTest {
 
     @Test
     public void whenNoSuchRef() {
-        String code = "007";
-        String url = "yandex.ru";
         Mockito.when(webRefRepository.findByCode(code))
                 .thenReturn(Optional.empty());
         IllegalArgumentException thrown = assertThrows(
