@@ -1,16 +1,12 @@
 package ru.job4j.shortcut.controller;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +21,6 @@ import ru.job4j.shortcut.ShortcutApplication;
 import ru.job4j.shortcut.dto.ConvertRequest;
 import ru.job4j.shortcut.dto.ConvertResponse;
 import ru.job4j.shortcut.service.ConvertService;
-import ru.job4j.shortcut.service.RegistrationService;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = ShortcutApplication.class)
 @AutoConfigureMockMvc
@@ -39,7 +32,7 @@ class ConvertControllerTest {
     @MockBean
     private ConvertService convertService;
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     @WithMockUser

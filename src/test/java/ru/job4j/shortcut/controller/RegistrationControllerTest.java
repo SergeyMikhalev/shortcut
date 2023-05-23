@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,8 +23,6 @@ import ru.job4j.shortcut.dto.RegistrationRequest;
 import ru.job4j.shortcut.dto.RegistrationResponse;
 import ru.job4j.shortcut.service.RegistrationService;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest(classes = ShortcutApplication.class)
 @AutoConfigureMockMvc
 class RegistrationControllerTest {
@@ -36,7 +33,7 @@ class RegistrationControllerTest {
     @MockBean
     private RegistrationService registrationService;
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void whenRegistrationOk() throws Exception {

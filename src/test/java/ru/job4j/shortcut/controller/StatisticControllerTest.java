@@ -1,6 +1,5 @@
 package ru.job4j.shortcut.controller;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,13 +16,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.job4j.shortcut.ShortcutApplication;
 import ru.job4j.shortcut.dto.RefStatistic;
-import ru.job4j.shortcut.service.RegistrationService;
 import ru.job4j.shortcut.service.StatisticService;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @SpringBootTest(classes = ShortcutApplication.class)
 @AutoConfigureMockMvc
@@ -34,7 +29,7 @@ class StatisticControllerTest {
     @MockBean
     private StatisticService statisticService;
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     @WithMockUser
