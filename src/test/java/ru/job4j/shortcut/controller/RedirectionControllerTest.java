@@ -29,7 +29,7 @@ class RedirectionControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private static RedirectionService redirectionService;
+    private  RedirectionService redirectionService;
 
 
     @Test
